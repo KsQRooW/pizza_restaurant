@@ -1,0 +1,18 @@
+###
+GET http://localhost:8080/menus
+Content-Type: application/json
+
+###
+POST http://localhost:8080/menus
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "daily",
+  "items": [{"id": 1, "name": "eggs", "price": 100}, {"id": 2, "name": "steak", "price": 1000}]
+}
+
+
+###
+GET http://localhost:8080/menu/daily
+Content-Type: application/json

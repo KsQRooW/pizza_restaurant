@@ -1,0 +1,16 @@
+PUT http://localhost:8080/orderStatus/
+Content-Type: application/json
+
+{"orderId": 1, "status": true}
+
+###
+GET http://localhost:8080/orders
+Accept: application/json
+
+###
+POST http://localhost:8080/orders
+Content-Type: application/json
+
+{"id": 1, "orderId": 1, "userId":  1, "itemId":  1}
+
+###
