@@ -23,7 +23,7 @@ class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
   val server: EmbeddedPostgres = EmbeddedPostgres
     .builder()
-    .setPort(5334)
+    .setPort(5338)
     .start()
 
 
@@ -118,7 +118,24 @@ class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
         entityAs[String] should ===("""{"age":42,"countryOfResidence":"jp","id":1,"name":"Kapi"}""")
       }
     }
-/*
+
+    "обновляет user (PUT /user)" in {
+      val user = User(1, "Kapi", 16, "ww")
+
+      val entity = Marshal(user).to[MessageEntity].futureValue
+      val request = Put(uri = "/user/Kapi").withEntity(entity)
+
+      request ~> userRoutes ~> check {
+        status should ===(StatusCodes.OK)
+
+        // we expect the response to be json:
+        contentType should ===(ContentTypes.`application/json`)
+
+        // and no entries should be in the list:
+        entityAs[String] should ===("""{"description":"User Kapi updated."}""")
+      }
+    }
+
     "удаляет user (DELETE /user)" in {
 
       val request = Delete(uri = "/user/Kapi")
@@ -132,6 +149,6 @@ class UserRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
         // and no entries should be in the list:
         entityAs[String] should ===("""{"description":"User Kapi deleted."}""")
       }
-    } */
+    }
   }
 }

@@ -40,7 +40,9 @@ trait UserServiceImpl extends UserService with UserRepo{
 
   override def updateUser(name: String, user: User): Future[Int] = {
     db.run{
-      userTable.filter(_.name === name).update(???)
+      userTable.filter(_.name === name)
+        .map(user => (user.name, user.age, user.countryOfResidence))
+        .update((user.name, user.age, user.countryOfResidence))
     }
   }
 

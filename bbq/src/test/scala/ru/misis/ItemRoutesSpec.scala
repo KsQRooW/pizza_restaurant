@@ -20,7 +20,7 @@ class ItemRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
   val server: EmbeddedPostgres = EmbeddedPostgres
     .builder()
-    .setPort(5334)
+    .setPort(5338)
     .start()
 
 
@@ -71,7 +71,7 @@ class ItemRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
 
     "be able to add items (POST /items)" in {
-      val item = Item(1, "eggs", 100)
+      val item = Item(3, "myaso", 100)
 
       // using the RequestBuilding DSL:
       val entity = Marshal(item).to[MessageEntity].futureValue
@@ -84,7 +84,7 @@ class ItemRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
         contentType should ===(ContentTypes.`application/json`)
 
         // and we know what message we're expecting back:
-        entityAs[String] should ===("""{"description":"Item eggs created."}""")
+        entityAs[String] should ===("""{"description":"Item myaso created."}""")
       }
     }
 
@@ -98,12 +98,12 @@ class ItemRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
         contentType should ===(ContentTypes.`application/json`)
 
         // and no entries should be in the list:
-        entityAs[String] should ===("""{"items":[{"id":1,"name":"eggs","price":100.0}]}""")
+        entityAs[String] should ===("""{"items":[{"id":3,"name":"myaso","price":100.0}]}""")
       }
     }
 
     "возвращает добавленный item (GET /item)" in {
-      val request = HttpRequest(uri = "/item/eggs")
+      val request = HttpRequest(uri = "/item/myaso")
 
       request ~> itemRoutes ~> check {
         status should ===(StatusCodes.OK)
@@ -112,7 +112,39 @@ class ItemRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
         contentType should ===(ContentTypes.`application/json`)
 
         // and no entries should be in the list:
-        entityAs[String] should ===("""{"id":1,"name":"eggs","price":100.0}""")
+        entityAs[String] should ===("""{"id":3,"name":"myaso","price":100.0}""")
+      }
+    }
+
+    "обновляет item (PUT /item)" in {
+      val item = Item(3, "myaso", 33.3)
+
+      val entity = Marshal(item).to[MessageEntity].futureValue
+      val request = Put(uri = "/item/3").withEntity(entity)
+
+      request ~> itemRoutes ~> check {
+        status should ===(StatusCodes.OK)
+
+        // we expect the response to be json:
+        contentType should ===(ContentTypes.`application/json`)
+
+        // and no entries should be in the list:
+        entityAs[String] should ===("""{"description":"Item 3 updated."}""")
+      }
+    }
+
+    "удаляет item (DELETE /item)" in {
+
+      val request = Delete(uri = "/item/myaso")
+
+      request ~> itemRoutes ~> check {
+        status should ===(StatusCodes.OK)
+
+        // we expect the response to be json:
+        contentType should ===(ContentTypes.`application/json`)
+
+        // and no entries should be in the list:
+        entityAs[String] should ===("""{"description":"Item myaso deleted."}""")
       }
     }
   }

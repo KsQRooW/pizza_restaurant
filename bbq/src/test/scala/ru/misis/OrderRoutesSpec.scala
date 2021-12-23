@@ -18,7 +18,7 @@ class OrderRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
 
   val server: EmbeddedPostgres = EmbeddedPostgres
     .builder()
-    .setPort(5334)
+    .setPort(5338)
     .start()
 
 
@@ -62,7 +62,7 @@ class OrderRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
     }
 
     "добавляет новый заказ (POST /orders)" in {
-      val order = Order(1, 1, 1, 1)
+      val order = Order(1, 1, 1, 1, 1, 2)
 
       val entity = Marshal(order).to[MessageEntity].futureValue
       val request = Post("/orders").withEntity(entity)
@@ -102,7 +102,39 @@ class OrderRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
         contentType should ===(ContentTypes.`application/json`)
 
         // and no entries should be in the list:
-        entityAs[String] should ===("""{"items":[{"id":1,"name":"Null","price":-1.0}],"name":"Null","orderId":1,"status":false}""")
+        entityAs[String] should ===("""{"items":[{"count":2,"item":{"id":1,"name":"eggs","price":100.0}}],"orderId":1,"status":"Accepted","userId":1}""")
+      }
+    }
+
+    "обновляет order (PUT /order)" in {
+      val order = Order(1, 1, 1, 2, 1, 5)
+
+      val entity = Marshal(order).to[MessageEntity].futureValue
+      val request = Put(uri = "/order/1").withEntity(entity)
+
+      request ~> orderRoutes ~> check {
+        status should ===(StatusCodes.OK)
+
+        // we expect the response to be json:
+        contentType should ===(ContentTypes.`application/json`)
+
+        // and no entries should be in the list:
+        entityAs[String] should ===("""{"description":"Order 1 updated."}""")
+      }
+    }
+
+    "удаляет order (DELETE /order)" in {
+
+      val request = Delete(uri = "/order/1")
+
+      request ~> orderRoutes ~> check {
+        status should ===(StatusCodes.OK)
+
+        // we expect the response to be json:
+        contentType should ===(ContentTypes.`application/json`)
+
+        // and no entries should be in the list:
+        entityAs[String] should ===("""{"description":"Order 1 deleted."}""")
       }
     }
   }

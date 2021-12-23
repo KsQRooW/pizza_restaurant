@@ -13,3 +13,7 @@ POST http://localhost:8080/items
 Content-Type: application/json
 
 {"id": 2, "name": "steak", "price": 1000}
+
+###
+DELETE http://localhost:8080/item/steak
+Accept: application/json

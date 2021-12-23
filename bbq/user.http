@@ -32,7 +32,7 @@ Accept: application/json
 PUT http://localhost:8080/user/Маша
 Content-Type: application/json
 
-{"name": "Ваня", "age": 25, "countryOfResidence": "Ru"}
+{"id": 1000, "name": "Ваня", "age": 25, "countryOfResidence": "Ru"}
 
 ###
 DELETE http://localhost:8080/user/John

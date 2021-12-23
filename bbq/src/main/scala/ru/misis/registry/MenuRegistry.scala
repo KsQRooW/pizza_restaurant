@@ -26,7 +26,7 @@ abstract class MenuRegistry(implicit val system: ActorSystem[_], executionContex
             getMenu(name).map(replyTo ! GetMenuResponse(_))
             Behaviors.same
         case DeleteMenu(name, replyTo) =>
-            deleteMenu(name).map(_ => replyTo ! ActionPerformed(s"Menu $name updated."))
+            deleteMenu(name).map(_ => replyTo ! ActionPerformed(s"Menu $name deleted."))
             Behaviors.same
     }
 

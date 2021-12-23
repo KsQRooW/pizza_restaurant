@@ -26,16 +26,20 @@ class OrderRoutes(orderRegistry: ActorRef[OrderRegistry.Command])(implicit val s
     orderRegistry.ask(GetOrders)
   def getOrder(orderId: Int): Future[GetOrderResponse] =
     orderRegistry.ask(GetOrder(orderId, _))
+  def getOrdersWithStatus(status: String): Future[OrdersDto] =
+    orderRegistry.ask(GetOrdersWithStatus(status, _))
+  def createOrder(order: Order): Future[ActionPerformed] =
+    orderRegistry.ask(CreateOrder(order, _))
+  def updateOrder(orderId: Int, order: Order): Future[ActionPerformed] =
+    orderRegistry.ask(UpdateOrder(orderId, order, _))
+  def deleteOrder(orderId: Int): Future[ActionPerformed] =
+    orderRegistry.ask(DeleteOrder(orderId, _))
 
   def getOrderStatus(orderId: Int): Future[ActionPerformed] =
     orderRegistry.ask(GetOrderStatus(orderId, _))
-  def updateOrderStatus(orderId: Int, status: Boolean): Future[ActionPerformed] =
+  def updateOrderStatus(orderId: Int, status: String): Future[ActionPerformed] =
     orderRegistry.ask(UpdateOrderStatus(orderId, status, _))
 
-  def createOrder(order: Order): Future[ActionPerformed] =
-    orderRegistry.ask(CreateOrder(order, _))
-  def deleteOrder(orderId: Int): Future[ActionPerformed] =
-    orderRegistry.ask(DeleteOrder(orderId, _))
 
   val routes: Route =
   path("orders") {
@@ -59,6 +63,15 @@ class OrderRoutes(orderRegistry: ActorRef[OrderRegistry.Command])(implicit val s
         }
       }
     } ~
+  path("ordersWith" / Segment) { status =>
+      get {
+        rejectEmptyResponse {
+          onSuccess(getOrdersWithStatus(status)) { response =>
+            complete(response)
+          }
+        }
+      }
+  } ~
   path("status" /  Segment) { orderStatus =>
       get {
         rejectEmptyResponse {
@@ -71,6 +84,13 @@ class OrderRoutes(orderRegistry: ActorRef[OrderRegistry.Command])(implicit val s
   path("orderStatus" / Segment) { id =>
       (put & entity(as[OrderStatus])) { status =>
         onSuccess(updateOrderStatus(id.toInt, status.status)) { performed =>
+          complete((StatusCodes.OK, performed))
+        }
+      }
+  } ~
+  path("order" / Segment) { orderId =>
+      (put & entity(as[Order])) { order =>
+        onSuccess(updateOrder(orderId.toInt, order)) { performed =>
           complete((StatusCodes.OK, performed))
         }
       }

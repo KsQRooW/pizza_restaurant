@@ -25,7 +25,7 @@ class InitDB(db: Database) extends ItemRepo with MenuRepo with OrderRepo with Us
             menuTable.schema.dropIfExists,
             orderTable.schema.dropIfExists,
             userTable.schema.dropIfExists,
-            orderStatusTable.schema.createIfNotExists
+            orderStatusTable.schema.dropIfExists
         )}
     }
 

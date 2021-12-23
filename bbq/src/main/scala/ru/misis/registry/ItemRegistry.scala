@@ -22,8 +22,11 @@ abstract class ItemRegistry(implicit val system: ActorSystem[_], executionContex
         case GetItem(name, replyTo) =>
             getItem(name).map(replyTo ! GetItemResponse(_))
             Behaviors.same
+        case UpdateItem(itemId, item, replyTo) =>
+            updateItem(itemId, item).map(_ => replyTo ! ActionPerformed(s"Item ${itemId} updated."))
+            Behaviors.same
         case DeleteItem(name, replyTo) =>
-            deleteItem(name).map(_ => ActionPerformed(s"Item $name deleted."))
+            deleteItem(name).map(_ => replyTo ! ActionPerformed(s"Item $name deleted."))
             Behaviors.same
     }
 }
@@ -33,6 +36,7 @@ object ItemRegistry {
     case class GetItems(replyTo: ActorRef[Items]) extends Command
     case class CreateItem(item: Item, replyTo: ActorRef[ActionPerformed]) extends Command
     case class GetItem(name: String, replyTo: ActorRef[GetItemResponse]) extends Command
+    case class UpdateItem(itemId: Int, item: Item, replyTo: ActorRef[ActionPerformed]) extends Command
     case class DeleteItem(name: String, replyTo: ActorRef[ActionPerformed]) extends Command
 
     case class Items(items: Seq[Item])

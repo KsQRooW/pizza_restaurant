@@ -39,6 +39,13 @@ class ItemRoutes(itemRegistry: ActorRef[ItemRegistry.Command])(implicit val syst
                   }
               }
         } ~
+        path("item" / Segment) { itemId =>
+              (put & entity(as[Item])) { item =>
+                  onSuccess(itemRegistry.ask(UpdateItem(itemId.toInt, item, _))) { performed =>
+                      complete((StatusCodes.OK, performed))
+                  }
+              }
+        } ~
         path("item" / Segment) { item =>
               delete {
                   onSuccess(itemRegistry.ask(DeleteItem(item, _))) { performed =>

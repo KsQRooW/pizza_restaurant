@@ -21,7 +21,7 @@ class MenuRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
 
     val server: EmbeddedPostgres = EmbeddedPostgres
         .builder()
-        .setPort(5334)
+        .setPort(5338)
         .start()
 
 
@@ -114,7 +114,20 @@ class MenuRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with Sc
                 entityAs[String] should ===("""{"id":1,"items":[{"id":1,"name":"eggs","price":100.0},{"id":2,"name":"steak","price":1000.0}],"name":"daily"}""")
             }
         }
+        "удаляет menu (DELETE /menu)" in {
 
+            val request = Delete(uri = "/menu/daily")
+
+            request ~> menuRoutes ~> check {
+                status should ===(StatusCodes.OK)
+
+                // we expect the response to be json:
+                contentType should ===(ContentTypes.`application/json`)
+
+                // and no entries should be in the list:
+                entityAs[String] should ===("""{"description":"Menu daily deleted."}""")
+            }
+        }
     }
 
 

@@ -50,5 +50,11 @@ trait MenuServiceImpl extends MenuService with MenuRepo with ItemRepo{
             .headOption)
     }
 
-    override def deleteMenu(name: String): Future[Unit] = ???
+    override def deleteMenu(name: String): Future[Unit] = {
+        db.run { DBIO.seq(
+            menuTable.filter(_.name === name).delete,
+            menuItemTable.filter(_.menuId in menuTable.filter(_.name === name).map(_.id)).delete
+        ).transactionally
+        }
+    }
 }

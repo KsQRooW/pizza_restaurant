@@ -68,7 +68,7 @@ object BBQApp {
             val menuRoutes = new MenuRoutes(menuRegistryActor)
             val itemRoutes = new ItemRoutes(itemRegistryActor)
             val orderRoutes = new OrderRoutes(orderRegistryActor)
-            startHttpServer(userRoutes.routes ~ menuRoutes.routes ~ itemRoutes.routes ~ orderRoutes.routes)(context.system)
+            startHttpServer(userRoutes.routes ~ itemRoutes.routes ~ menuRoutes.routes ~ orderRoutes.routes)(context.system)
 
             Behaviors.empty
         }
