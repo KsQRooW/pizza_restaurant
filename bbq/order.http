@@ -4,7 +4,7 @@ Content-Type: application/json
 {"orderId": 1, "status": "Gotovo"}
 
 ###
-GET http://localhost:8080/order/1
+GET http://localhost:8080/orders
 Accept: application/json
 
 ###
@@ -12,12 +12,10 @@ POST http://localhost:8080/orders
 Content-Type: application/json
 
 {
-  "id": 1,
   "orderId": 1,
   "userId": 1,
-  "itemId": 1,
   "menuId": 1,
-  "count": 2
+  "itemAndCount": [[2, 2]]
 }
 
 ###

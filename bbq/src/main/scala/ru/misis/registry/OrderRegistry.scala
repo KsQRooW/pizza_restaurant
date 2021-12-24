@@ -3,7 +3,7 @@ package ru.misis.registry
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, ActorSystem, Behavior}
 import akka.util.Timeout
-import ru.misis.model.{Item, Order, OrderStatus}
+import ru.misis.model.{Item, OrderItem, Order}
 import ru.misis.services.OrderService
 
 import scala.concurrent.ExecutionContext
@@ -44,10 +44,10 @@ abstract class OrderRegistry(implicit val system: ActorSystem[_], executionConte
 object OrderRegistry {
     sealed trait Command
     case class GetOrders(replyTo: ActorRef[OrdersDto]) extends Command
-    case class CreateOrder(order: Order, replyTo: ActorRef[ActionPerformed]) extends Command
+    case class CreateOrder(order: OrderDto, replyTo: ActorRef[ActionPerformed]) extends Command
     case class GetOrder(orderId: Int, replyTo: ActorRef[GetOrderResponse]) extends Command
     case class GetOrdersWithStatus(status: String, replyTo: ActorRef[OrdersDto]) extends Command
-    case class UpdateOrder(orderId: Int, order: Order, replyTo: ActorRef[ActionPerformed]) extends Command
+    case class UpdateOrder(orderId: Int, order: OrderItem, replyTo: ActorRef[ActionPerformed]) extends Command
     case class DeleteOrder(orderId: Int, replyTo: ActorRef[ActionPerformed]) extends Command
 
     case class UpdateOrderStatus(orderId: Int, status: String, replyTo: ActorRef[ActionPerformed]) extends Command
@@ -55,10 +55,11 @@ object OrderRegistry {
 
 
     case class OrdersDto(orders: Set[Int])
-    case class OrderDto(orderId: Int, userId: Int, status: String, items: Seq[ItemOrder])
+    case class OrderDto(orderId: Int, userId: Int, menuId: Int, itemAndCount: Seq[(Int, Int)])
+    case class OrderOut(orderId: Int, userId: Int, status: String, items: Seq[ItemOrder])
     case class ItemOrder(item: Item, count: Int)
 
-    final case class GetOrderResponse(maybeOrder: Option[OrderDto])
+    final case class GetOrderResponse(maybeOrder: Option[OrderOut])
     //final case class GetOrdersResponse(maybeOrders: Option[OrdersDto])
     final case class ActionPerformed(description: String)
 }

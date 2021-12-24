@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.util.Timeout
-import ru.misis.model.{Order, OrderStatus}
+import ru.misis.model.{OrderItem, Order}
 import ru.misis.registry.OrderRegistry
 import ru.misis.registry.OrderRegistry._
 //import ru.misis.registry.OrderRegistry.{ActionPerformed, CreateOrder, DeleteOrder, GetOrder, GetOrderResponse, GetOrders, OrderDto, OrdersDto}
@@ -28,9 +28,9 @@ class OrderRoutes(orderRegistry: ActorRef[OrderRegistry.Command])(implicit val s
     orderRegistry.ask(GetOrder(orderId, _))
   def getOrdersWithStatus(status: String): Future[OrdersDto] =
     orderRegistry.ask(GetOrdersWithStatus(status, _))
-  def createOrder(order: Order): Future[ActionPerformed] =
+  def createOrder(order: OrderDto): Future[ActionPerformed] =
     orderRegistry.ask(CreateOrder(order, _))
-  def updateOrder(orderId: Int, order: Order): Future[ActionPerformed] =
+  def updateOrder(orderId: Int, order: OrderItem): Future[ActionPerformed] =
     orderRegistry.ask(UpdateOrder(orderId, order, _))
   def deleteOrder(orderId: Int): Future[ActionPerformed] =
     orderRegistry.ask(DeleteOrder(orderId, _))
@@ -48,7 +48,7 @@ class OrderRoutes(orderRegistry: ActorRef[OrderRegistry.Command])(implicit val s
     }
   } ~
   path("orders") {
-      (post & entity(as[Order])) { order =>
+      (post & entity(as[OrderDto])) { order =>
         onSuccess(createOrder(order)) { performed =>
           complete((StatusCodes.Created, performed))
         }
@@ -82,14 +82,14 @@ class OrderRoutes(orderRegistry: ActorRef[OrderRegistry.Command])(implicit val s
       }
   } ~
   path("orderStatus" / Segment) { id =>
-      (put & entity(as[OrderStatus])) { status =>
+      (put & entity(as[Order])) { status =>
         onSuccess(updateOrderStatus(id.toInt, status.status)) { performed =>
           complete((StatusCodes.OK, performed))
         }
       }
   } ~
   path("order" / Segment) { orderId =>
-      (put & entity(as[Order])) { order =>
+      (put & entity(as[OrderItem])) { order =>
         onSuccess(updateOrder(orderId.toInt, order)) { performed =>
           complete((StatusCodes.OK, performed))
         }

@@ -8,8 +8,9 @@ import com.opentable.db.postgres.embedded.EmbeddedPostgres
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import ru.misis.model.Order
+import ru.misis.model.OrderItem
 import ru.misis.registry.OrderRegistry
+import ru.misis.registry.OrderRegistry.OrderDto
 import ru.misis.routes.OrderRoutes
 import ru.misis.services.{InitDB, OrderServiceImpl}
 import slick.jdbc.PostgresProfile.api._
@@ -62,7 +63,7 @@ class OrderRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
     }
 
     "добавляет новый заказ (POST /orders)" in {
-      val order = Order(1, 1, 1, 1, 1, 2)
+      val order = OrderDto(1, 1, 1, Seq((1, 1), (2, 2)))
 
       val entity = Marshal(order).to[MessageEntity].futureValue
       val request = Post("/orders").withEntity(entity)
@@ -102,12 +103,12 @@ class OrderRoutesSpec extends AnyWordSpec with Matchers with ScalaFutures with S
         contentType should ===(ContentTypes.`application/json`)
 
         // and no entries should be in the list:
-        entityAs[String] should ===("""{"items":[{"count":2,"item":{"id":1,"name":"eggs","price":100.0}}],"orderId":1,"status":"Accepted","userId":1}""")
+        entityAs[String] should ===("""{"items":[{"count":1,"item":{"id":1,"name":"eggs","price":100.0}},{"count":2,"item":{"id":2,"name":"steak","price":1000.0}}],"orderId":1,"status":"Accepted","userId":1}""")
       }
     }
 
     "обновляет order (PUT /order)" in {
-      val order = Order(1, 1, 1, 2, 1, 5)
+      val order = OrderItem("1", 1, 1, 2, 1, 5)
 
       val entity = Marshal(order).to[MessageEntity].futureValue
       val request = Put(uri = "/order/1").withEntity(entity)
